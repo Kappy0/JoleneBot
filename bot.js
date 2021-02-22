@@ -14,10 +14,15 @@ const api_headers = {
 
 bot.once("ready", () => {
 	console.log(`Bot is ready! ${bot.user.username}`);
+	//console.log(Object.keys(stream_list.users).length);
+	console.log(stream_list.users.length);
 });
 
 bot.on("ready", async() => {
-	console.log(stream_list);
+	for(var i = 0; i < stream_list.users.length; i++)
+	{
+		console.log(stream_list.users[i].username);
+	}
 });
 
 bot.login(bot_settings.token);
