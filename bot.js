@@ -9,7 +9,7 @@ const stream_list = require("./streams.json");
 const stream_URL = 'https://api.twitch.tv/helix/streams?user_id=';
 const api_headers = {
 	'Authorization':'Bearer '+ bot_settings.twitch_token,
-	'Client-ID':'hvkh2ps0jcndeha05urm1uy4j0nu5k',
+	'Client-ID': bot_settings.client_id,
 }
 
 bot.once("ready", () => {
