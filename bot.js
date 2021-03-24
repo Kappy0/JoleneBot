@@ -7,7 +7,7 @@ bot = new discord.Client();
 
 //For grabbing Twitch API data
 const stream_list = require("./streams.json");
-const stream_URL = 'https://api.twitch.tv/helix/streams?user_id=';
+const stream_URL = 'https://api.twitch.tv/helix/streams?user_login=';
 const api_headers = {
 	'Authorization':'Bearer '+ bot_settings.twitch_token,
 	'Client-ID': bot_settings.client_id,
@@ -23,7 +23,7 @@ bot.on("ready", async() => {
 	for(var i = 0; i < stream_list.users.length; i++)
 	{
 		console.log(stream_list.users[i].username);
-		stream_list.users[i].announced = true;
+		stream_list.users[i].announced = false;
 
 		fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
 							if(err) throw (err);
@@ -51,7 +51,7 @@ bot.on("ready", async() => {
 						let embed = new discord.MessageEmbed()
 							//.setAuthor(`${data[0].user_name} is now live!`)
 							.setDescription("https://twitch.tv/kappylp")
-							.addField("Title", data[0].title)
+							.setTitle(data[0].title)
 							.addField("Game", data[0].game_name)
 							//.setThumbnail(data[0].thumbnail_url)
 							.setFooter("Started at " + data[0].started_at);
