@@ -13,21 +13,35 @@ const api_headers = {
 	'Client-ID': bot_settings.client_id,
 }
 
+//Quick function to produce a date in my local CST timezone
+let date = date => new Date(date.getTime() - date.getTimezoneOffset()*60000); 
+
+//Logging output
+const log_output = fs.createWriteStream('./logs/jolene-log.txt',{flags: 'a'});
+const logger = new console.Console(log_output);
+
 bot.once("ready", () => {
 	console.log(`Bot is ready! ${bot.user.username}`);
 	//console.log(Object.keys(stream_list.users).length);
 	console.log(stream_list.users.length);
 });
 
+bot.once("ready", () => {
+	console.log(`Bot is ready! ${bot.user.username}`);
+	console.log(bot.commands);
+
+	logger.log("[" + date(new Date()).toISOString() + "] " + "Another log file test");
+});
+
 bot.on("ready", async() => {
 	for(var i = 0; i < stream_list.users.length; i++)
 	{
-		console.log(stream_list.users[i].username);
+		//console.log(stream_list.users[i].username);
 		stream_list.users[i].announced = false;
 
 		fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-							if(err) throw (err);
-						});
+			if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
+		});
 	}
 
 	bot.setInterval(() => {
@@ -41,7 +55,7 @@ bot.on("ready", async() => {
 			.then(body => {
 				let data = body.data;
 
-				if(data[0])
+				if(data[0] !== undefined)
 				{
 					console.log("Got Twitch data!");
 					if(!streamer.announced)
@@ -49,8 +63,8 @@ bot.on("ready", async() => {
 						streamer.announced = true;
 
 						let embed = new discord.MessageEmbed()
-							//.setAuthor(`${data[0].user_name} is now live!`)
-							.setDescription("https://twitch.tv/kappylp")
+							.setAuthor(streamer.username + " is now live!")
+							.setDescription("https://twitch.tv/" + streamer.username)
 							.setTitle(data[0].title)
 							.addField("Game", data[0].game_name)
 							//.setThumbnail(data[0].thumbnail_url)
@@ -63,11 +77,11 @@ bot.on("ready", async() => {
 							if(err) throw (err);
 						});
 					}
-					else console.log("Stream has already been announced!");
+					//else console.log("Stream has already been announced!");
 				}
 				else
 				{
-					console.log("No one's streaming");
+					//console.log("No one's streaming");
 					if(streamer.announced)
 					{
 						streamer.announced = false;
@@ -77,10 +91,10 @@ bot.on("ready", async() => {
 						});
 					}
 
-					console.log("Checking status...");
-					console.log(body);
+					//console.log("Checking status...");
+					//console.log(body);
 				}
-			}).catch((err) => console.log("Caught " + err.stack));
+			}).catch((err) => logger.log("[" + date(new Date()).toISOString() + "] " + "Caught " + err.stack));
 		}
 	}, 60000);
 });
