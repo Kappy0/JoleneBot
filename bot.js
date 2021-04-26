@@ -22,13 +22,7 @@ const logger = new console.Console(log_output);
 
 bot.once("ready", () => {
 	console.log(`Bot is ready! ${bot.user.username}`);
-	//console.log(Object.keys(stream_list.users).length);
-	console.log(stream_list.users.length);
-});
-
-bot.once("ready", () => {
-	console.log(`Bot is ready! ${bot.user.username}`);
-	console.log(bot.commands);
+	//console.log(bot.commands);
 
 	logger.log("[" + date(new Date()).toISOString() + "] " + "Another log file test");
 });
@@ -43,6 +37,8 @@ bot.on("ready", async() => {
 			if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
 		});
 	}
+
+	let stream_notif_channel = bot.channels.cache.get('556936544682901512');
 
 	bot.setInterval(() => {
 		for(var i = 0; i < stream_list.users.length; i++)
@@ -70,8 +66,7 @@ bot.on("ready", async() => {
 							//.setThumbnail(data[0].thumbnail_url)
 							.setFooter("Started at " + data[0].started_at);
 
-						let notif_channel = bot.channels.cache.get('556936544682901512');
-						notif_channel.send(`@here ${data[0].user_name} is LIVE!`, {embed: embed});
+						stream_notif_channel.send(`@here ${data[0].user_name} is LIVE!`, {embed: embed});
 
 						fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
 							if(err) throw (err);
@@ -97,6 +92,12 @@ bot.on("ready", async() => {
 			}).catch((err) => logger.log("[" + date(new Date()).toISOString() + "] " + "Caught " + err.stack));
 		}
 	}, 60000);
+});
+
+bot.on("guildMemberAdd", async member => {
+	let join_notif_channel = bot.channels.cache.get('836233040715841557');
+
+	join_notif_channel.send(`Welcome to the Glitz Pit, ${member.user}! Try not to get destroyed out there.`);
 });
 
 bot.login(bot_settings.token);
