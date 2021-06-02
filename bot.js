@@ -13,6 +13,14 @@ const api_headers = {
 	'Client-ID': bot_settings.client_id,
 }
 
+//Game IDs for Paper Mario 64, Paper Mario: The Thousand-Year Door, and Bug Fables
+let pm64 = 0;
+let ttyd = 6855;
+let bf = 0;
+
+//ID for the "CHallenge Run" tag on Twitch
+let challenge_run_tag = "81df4005-f654-40b2-9fc0-9fd767bc8e3e"
+
 //Quick function to produce a date in my local CST timezone
 let date = date => new Date(date.getTime() - date.getTimezoneOffset()*60000);
 
@@ -27,10 +35,6 @@ bot.once("ready", () => {
 	console.log(`Bot is ready! ${bot.user.username}`);
 	//console.log(bot.commands);
 
-	logger.log("[" + date(new Date()).toISOString() + "] " + "Another log file test");
-});
-
-bot.on("ready", async() => {
 	for(var i = 0; i < stream_list.users.length; i++)
 	{
 		//console.log(stream_list.users[i].username);
@@ -41,6 +45,10 @@ bot.on("ready", async() => {
 		});
 	}
 
+	logger.log("[" + date(new Date()).toISOString() + "] " + "Another log file test");
+});
+
+bot.on("ready", async() => {	
 	let stream_notif_channel = bot.channels.cache.get('556936544682901512');
 
 	bot.setInterval(() => {
@@ -62,10 +70,12 @@ bot.on("ready", async() => {
 						streamer.announced = true;
 
 						let embed = new discord.MessageEmbed()
-							.setAuthor(streamer.username + " is now live!")
+							//.setAuthor(streamer.username + " is now live!")
+							.setAuthor(data[0].game_id)
 							.setDescription("https://twitch.tv/" + streamer.username)
 							.setTitle(data[0].title)
 							.addField("Game", data[0].game_name)
+							//.addField("Tags", data[0].tag_ids)
 							//.setThumbnail(data[0].thumbnail_url)
 							.setFooter("Started at " + data[0].started_at);
 
