@@ -72,7 +72,7 @@ bot.on("ready", async() => {
 						stream_notif_channel.send(`@here ${data[0].user_name} is LIVE!`, {embed: embed});
 
 						fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-							if(err) throw (err);
+							if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
 						});
 					}
 					//else console.log("Stream has already been announced!");
@@ -85,7 +85,7 @@ bot.on("ready", async() => {
 						streamer.announced = false;
 
 						fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-							if(err) throw (err);
+							if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
 						});
 					}
 
