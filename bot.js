@@ -13,13 +13,13 @@ const api_headers = {
 	'Client-ID': bot_settings.client_id,
 }
 
-//Game IDs for Paper Mario 64, Paper Mario: The Thousand-Year Door, and Bug Fables
-let pm64 = 0;
+//Twitch Game IDs for Paper Mario 64, Paper Mario: The Thousand-Year Door, and Bug Fables
+let pm64 = 18231;
 let ttyd = 6855;
-let bf = 0;
+let bf = 511735;
 
-//ID for the "CHallenge Run" tag on Twitch
-let challenge_run_tag = "81df4005-f654-40b2-9fc0-9fd767bc8e3e"
+//ID for the "Challenge Run" tag on Twitch
+let challenge_run_tag = "81df4005-f654-40b2-9fc0-9fd767bc8e3e";
 
 //Quick function to produce a date in my local CST timezone
 let date = date => new Date(date.getTime() - date.getTimezoneOffset()*60000);
@@ -65,27 +65,32 @@ bot.on("ready", async() => {
 				if(data[0] !== undefined)
 				{
 					console.log("Got Twitch data!");
-					if(!streamer.announced)
+					if(data[0].game_id === pm64 || data[0].game_id === ttyd || data[0].game_id === bf)
 					{
-						streamer.announced = true;
+						console.log("Found a valid game to announce!");
+						if(!streamer.announced)
+						{
+							streamer.announced = true;
 
-						let embed = new discord.MessageEmbed()
-							//.setAuthor(streamer.username + " is now live!")
-							.setAuthor(data[0].game_id)
-							.setDescription("https://twitch.tv/" + streamer.username)
-							.setTitle(data[0].title)
-							.addField("Game", data[0].game_name)
-							//.addField("Tags", data[0].tag_ids)
-							//.setThumbnail(data[0].thumbnail_url)
-							.setFooter("Started at " + data[0].started_at);
+							let embed = new discord.MessageEmbed()
+								//.setAuthor(streamer.username + " is now live!")
+								.setAuthor(data[0].game_id)
+								.setDescription("https://twitch.tv/" + streamer.username)
+								.setTitle(data[0].title)
+								.addField("Game", data[0].game_name)
+								//.addField("Tags", data[0].tag_ids)
+								//.setThumbnail(data[0].thumbnail_url)
+								.setFooter("Started at " + data[0].started_at);
 
-						stream_notif_channel.send(`@here ${data[0].user_name} is LIVE!`, {embed: embed});
+							stream_notif_channel.send(`@here ${data[0].user_name} is LIVE!`, {embed: embed});
 
-						fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-							if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
-						});
+							fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
+								if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
+							});
+						}
+						//else console.log("Stream has already been announced!");
+
 					}
-					//else console.log("Stream has already been announced!");
 				}
 				else
 				{
