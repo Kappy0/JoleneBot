@@ -48,8 +48,9 @@ bot.once("ready", () => {
 	logger.log("[" + date(new Date()).toISOString() + "] " + "Another log file test");
 });
 
-bot.on("ready", async() => {	
-	let stream_notif_channel = bot.channels.cache.get('556936544682901512');
+bot.on("ready", async() => {
+	//let stream_notif_channel = bot.channels.cache.get('197417548294258688');
+	let stream_notif_channel = bot.channels.cache.get('556936544682901512'); //Test Channel
 
 	bot.setInterval(() => {
 		for(var i = 0; i < stream_list.users.length; i++)
@@ -89,7 +90,6 @@ bot.on("ready", async() => {
 							});
 						}
 						//else console.log("Stream has already been announced!");
-
 					}
 				}
 				else
@@ -113,7 +113,8 @@ bot.on("ready", async() => {
 });
 
 bot.on("guildMemberAdd", async member => {
-	let join_notif_channel = bot.channels.cache.get('836233040715841557');
+	//let join_notif_channel = bot.channels.cache.get('349563157561212928');
+	let join_notif_channel = bot.channels.cache.get('836233040715841557'); //Test Channel
 
 	join_notif_channel.send(`Welcome to the Glitz Pit, ${member.user}! Try not to get destroyed out there.`);
 });
