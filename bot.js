@@ -63,7 +63,7 @@ bot.on("ready", async() => {
 			.then(body => {
 				let data = body.data;
 
-				if(data[0] !== undefined)
+				if(data !== undefined)
 				{
 					console.log("Got Twitch data!");
 					if(data[0].game_id === pm64 || data[0].game_id === ttyd || data[0].game_id === bf)
@@ -89,7 +89,6 @@ bot.on("ready", async() => {
 								if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
 							});
 						}
-						//else console.log("Stream has already been announced!");
 					}
 				}
 				else
