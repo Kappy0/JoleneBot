@@ -52,6 +52,9 @@ bot.on("ready", async() => {
 	//let stream_notif_channel = bot.channels.cache.get('197417548294258688');
 	let stream_notif_channel = bot.channels.cache.get('556936544682901512'); //Test Channel
 
+	//let log_notif_channel = bot.channels.cache.get('276480687266332672');
+	let log_notif_channel = bot.channels.cache.get('856929671072841792'); //Test Channel
+
 	bot.setInterval(() => {
 		for(var i = 0; i < stream_list.users.length; i++)
 		{
@@ -63,7 +66,14 @@ bot.on("ready", async() => {
 			.then(body => {
 				let data = body.data;
 
-				if(data !== undefined)
+				if(data === undefined)
+				{
+					logger.log("[" + date(new Date()).toISOString() + "] " + body);
+					log_notif_channel.send("Error accessing Twitch API");
+					return;
+				}
+
+				if(data[0] !== undefined)
 				{
 					console.log("Got Twitch data!");
 					if(data[0].game_id === pm64 || data[0].game_id === ttyd || data[0].game_id === bf)
@@ -93,7 +103,6 @@ bot.on("ready", async() => {
 				}
 				else
 				{
-					//console.log("No one's streaming");
 					if(streamer.announced)
 					{
 						streamer.announced = false;
