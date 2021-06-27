@@ -1,4 +1,5 @@
 node_modules
 logs
 botsettings.json
+apisettings.json
 streams.json
