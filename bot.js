@@ -1,14 +1,23 @@
-const bot_settings = require("./botsettings.json");
 const discord = require("discord.js");
 const fetch = require("node-fetch"); //Used for Twitch API
 const fs = module.require("fs"); //fs is Node.js's native file system module
 
 bot = new discord.Client();
 
+//Utilities
+const dateUtils = require('./date.js');
+const logUtils = require('./logger.js');
+const fileUtils = require('./file.js');
+const apiUtils = require('./api.js');
+
+//Settings
+const bot_settings = require("./botsettings.json");
+let api_settings = fileUtils.readSync('./apisettings.json');
+
 //For grabbing Twitch API data
 const stream_list = require("./streams.json");
 const stream_URL = 'https://api.twitch.tv/helix/streams?user_login=';
-const api_headers = {
+let api_headers = {
 	'Authorization':'Bearer '+ bot_settings.twitch_token,
 	'Client-ID': bot_settings.client_id,
 }
@@ -21,15 +30,9 @@ let bf = 511735;
 //ID for the "Challenge Run" tag on Twitch
 let challenge_run_tag = "81df4005-f654-40b2-9fc0-9fd767bc8e3e";
 
-//Quick function to produce a date in my local CST timezone
-let date = date => new Date(date.getTime() - date.getTimezoneOffset()*60000);
-
-//Quick function to produce a date in the format "mmddyyyy"
-let log_date = date => "" + (date.getMonth() + 1) + date.getDate() + date.getFullYear();
-
-//Logging output
-const log_output = fs.createWriteStream('./logs/jolene-log' + log_date(new Date()) + '.txt',{flags: 'a'});
-const logger = new console.Console(log_output);
+//Logging channel for bot on Discord itself
+//let log_notif_channel = bot.channels.cache.get('276480687266332672');
+let log_notif_channel = bot.channels.cache.get('856929671072841792'); //Test Channel
 
 bot.once("ready", () => {
 	console.log(`Bot is ready! ${bot.user.username}`);
@@ -37,46 +40,56 @@ bot.once("ready", () => {
 
 	for(var i = 0; i < stream_list.users.length; i++)
 	{
-		//console.log(stream_list.users[i].username);
 		stream_list.users[i].announced = false;
 
-		fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-			if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
-		});
+		fileUtils.writeAsync("streams.json", stream_list);
 	}
 
-	logger.log("[" + date(new Date()).toISOString() + "] " + "Another log file test");
+	logUtils.logger.log("[" + dateUtils.cen_time(new Date()).toISOString() + "] " + "Another log file test");
 });
 
 bot.on("ready", async() => {
 	//let stream_notif_channel = bot.channels.cache.get('197417548294258688');
 	let stream_notif_channel = bot.channels.cache.get('556936544682901512'); //Test Channel
 
-	//let log_notif_channel = bot.channels.cache.get('276480687266332672');
-	let log_notif_channel = bot.channels.cache.get('856929671072841792'); //Test Channel
+	//Logging channel for bot on Discord itself
+	//const log_notif_channel = bot.channels.cache.get('356828089327550485');
+	const log_notif_channel = bot.channels.cache.get('856929671072841792'); //Test Channel
+
+	let token_changed = false;
 
 	bot.setInterval(() => {
+		if(token_changed)
+		{
+			//refresh token params
+			api_settings = fileUtils.readSync('./apisettings.json');
+
+			api_headers = {
+				//'Authorization':'Bearer '+ api_settings.twitch_token,
+				'Authorization':'Bearer '+ api_settings.test,
+				'Client-ID': api_settings.client_id,
+			}
+
+			token_changed = false;
+		}
+
 		for(var i = 0; i < stream_list.users.length; i++)
 		{
 			let streamer = stream_list.users[i];
 
 			fetch(stream_URL + streamer.username, {
 				headers: api_headers,
-			}).then(response => response.json())
+			})
+			.then(res => apiUtils.twitch_api_status(res))
+			.then(response => response.json())
 			.then(body => {
 				let data = body.data;
-
-				if(data === undefined)
-				{
-					logger.log("[" + date(new Date()).toISOString() + "] " + body);
-					log_notif_channel.send("Error accessing Twitch API");
-					return;
-				}
 
 				if(data[0] !== undefined)
 				{
 					console.log("Got Twitch data!");
-					if(data[0].game_id === pm64 || data[0].game_id === ttyd || data[0].game_id === bf)
+					if(true)
+					//if(data[0].game_id === pm64 || data[0].game_id === ttyd || data[0].game_id === bf)
 					{
 						console.log("Found a valid game to announce!");
 						if(!streamer.announced)
@@ -95,9 +108,7 @@ bot.on("ready", async() => {
 
 							stream_notif_channel.send(`@here ${data[0].user_name} is LIVE!`, {embed: embed});
 
-							fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-								if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
-							});
+							fileUtils.writeSync("streams.json", stream_list);
 						}
 					}
 				}
@@ -107,15 +118,21 @@ bot.on("ready", async() => {
 					{
 						streamer.announced = false;
 
-						fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
+						fileUtils.writeSync("streams.json", stream_list);
+						/*fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
 							if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
-						});
+						});*/
 					}
 
 					//console.log("Checking status...");
 					//console.log(body);
 				}
-			}).catch((err) => logger.log("[" + date(new Date()).toISOString() + "] " + "Caught " + err.stack));
+			}).catch((err) => {
+				log_notif_channel.send("Error accessing Twitch API.");
+				logUtils.logger.log("[" + dateUtils.cen_time(new Date()).toISOString() + "] " + "Caught " + err.stack)
+
+				token_changed = true;
+			});
 		}
 	}, 60000);
 });
