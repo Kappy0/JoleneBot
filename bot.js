@@ -97,7 +97,6 @@ bot.on("ready", async() => {
 							streamer.announced = true;
 
 							let embed = new discord.MessageEmbed()
-								//.setAuthor(streamer.username + " is now live!")
 								.setAuthor(data[0].game_id)
 								.setDescription("https://twitch.tv/" + streamer.username)
 								.setTitle(data[0].title)
@@ -119,13 +118,7 @@ bot.on("ready", async() => {
 						streamer.announced = false;
 
 						fileUtils.writeSync("streams.json", stream_list);
-						/*fs.writeFile("streams.json", JSON.stringify(stream_list, null, 4), err => {
-							if(err) logger.log("[" + date(new Date()).toISOString() + "] " + err);
-						});*/
 					}
-
-					//console.log("Checking status...");
-					//console.log(body);
 				}
 			}).catch((err) => {
 				log_notif_channel.send("Error accessing Twitch API.");
