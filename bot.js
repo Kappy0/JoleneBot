@@ -131,10 +131,10 @@ bot.on("ready", async() => {
 });
 
 bot.on("guildMemberAdd", async member => {
-	//let join_notif_channel = bot.channels.cache.get('349563157561212928');
-	let join_notif_channel = bot.channels.cache.get('836233040715841557'); //Test Channel
+	//let join_notif_channel = member.guild.channels.cache.get('349563157561212928');
+	let join_notif_channel = member.guild.channels.cache.get('836233040715841557'); //Test Channel
 
-	join_notif_channel.send(`Welcome to the Glitz Pit, ${member.user}! Try not to get destroyed out there.`);
+	if(join_notif_channel) join_notif_channel.send(`Welcome to the Glitz Pit, ${member.user}! Try not to get destroyed out there.`);
 });
 
 bot.login(bot_settings.token);
